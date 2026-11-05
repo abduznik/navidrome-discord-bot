@@ -1,20 +1,30 @@
-"""Navidrome Discord Music Bot - Initial version with hardcoded config."""
-import asyncio, logging, random as rng
+"""Navidrome Discord Music Bot."""
+import asyncio, logging, os, random as rng
 from collections import deque
 import discord
 from discord.ext import commands
+from dotenv import load_dotenv
 from navidrome import NavidromeClient
+
+load_dotenv()
 
 logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(levelname)s] %(name)s: %(message)s")
 logger = logging.getLogger("bot")
 
-# Hardcoded config (will be moved to .env later)
-TOKEN = "REDACTED"
-ALLOWED_ROLE_ID = 1550215402984968202
-PREFIX = "??"
-NAVI_URL = "http://localhost:4533"
-NAVI_USER = "navidrome-bot"
-NAVI_PASS = "REDACTED"
+
+def _require(name):
+    value = os.getenv(name)
+    if not value:
+        raise RuntimeError(f"Missing required environment variable: {name}")
+    return value
+
+
+TOKEN = _require("DISCORD_TOKEN")
+ALLOWED_ROLE_ID = int(_require("DISCORD_ALLOWED_ROLE_ID"))
+PREFIX = os.getenv("DISCORD_COMMAND_PREFIX", "??")
+NAVI_URL = _require("NAVIDROME_URL")
+NAVI_USER = _require("NAVIDROME_USERNAME")
+NAVI_PASS = _require("NAVIDROME_PASSWORD")
 
 intents = discord.Intents.default()
 intents.message_content = True
@@ -45,8 +55,8 @@ class GuildMusicState:
         self._next_event.set()
 
     async def wait_for_next(self):
-        self._next_event.clear()
         await self._next_event.wait()
+        self._next_event.clear()
 
 states = {}
 
