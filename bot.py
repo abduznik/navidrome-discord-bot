@@ -53,7 +53,7 @@ states = {}
 def get_state(guild_id):
     if guild_id not in states:
         states[guild_id] = GuildMusicState()
-    return states(guild_id)
+    return states[guild_id]
 
 def has_allowed_role(ctx):
     if ctx.guild is None: return False
